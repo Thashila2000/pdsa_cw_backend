@@ -1,7 +1,7 @@
-package com.hdse242052.task_scheduler.service;
+package com.hdse242052.lms_final.service;
 
-import com.hdse242052.task_scheduler.entity.TaskEntity;
-import com.hdse242052.task_scheduler.dto.TaskDto;
+import com.hdse242052.lms_final.entity.TaskEntity;
+import com.hdse242052.lms_final.dto.TaskDto;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

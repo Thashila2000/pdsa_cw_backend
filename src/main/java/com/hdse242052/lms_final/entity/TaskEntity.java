@@ -1,4 +1,4 @@
-package com.hdse242052.task_scheduler.entity;
+package com.hdse242052.lms_final.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;

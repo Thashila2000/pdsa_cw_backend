@@ -1,4 +1,4 @@
-package com.hdse242052.task_scheduler.dto;
+package com.hdse242052.lms_final.dto;
 
 import lombok.Data;
 import java.time.LocalDateTime;

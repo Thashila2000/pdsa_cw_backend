@@ -1,4 +1,4 @@
-package com.hdse242052.task_scheduler;
+package com.hdse242052.lms_final;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

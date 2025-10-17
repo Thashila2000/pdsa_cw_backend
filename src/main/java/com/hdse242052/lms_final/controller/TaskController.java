@@ -1,9 +1,9 @@
-package com.hdse242052.task_scheduler.controller;
+package com.hdse242052.lms_final.controller;
 
-import com.hdse242052.task_scheduler.entity.TaskEntity;
-import com.hdse242052.task_scheduler.dto.TaskDto;
-import com.hdse242052.task_scheduler.repository.TaskRepository;
-import com.hdse242052.task_scheduler.service.TaskService;
+import com.hdse242052.lms_final.entity.TaskEntity;
+import com.hdse242052.lms_final.dto.TaskDto;
+import com.hdse242052.lms_final.repository.TaskRepository;
+import com.hdse242052.lms_final.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
