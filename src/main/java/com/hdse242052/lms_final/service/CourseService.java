@@ -1,9 +1,9 @@
 package com.hdse242052.lms_final.service;
 
 import com.hdse242052.lms_final.dto.CourseDto;
-import com.hdse242052.lms_final.entity.CourseEntity;
 import com.hdse242052.lms_final.repository.CourseRepository;
 import org.springframework.stereotype.Service;
+import com.hdse242052.lms_final.entity.CourseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,18 +11,9 @@ import java.util.List;
 @Service
 public class CourseService {
     private final CourseRepository repository;
-    private final CourseSearchTree searchTree = new CourseSearchTree();
 
     public CourseService(CourseRepository repository) {
         this.repository = repository;
-        buildSearchTree();
-    }
-
-    private void buildSearchTree() {
-        List<CourseEntity> allCourses = repository.findAll();
-        for (CourseEntity course : allCourses) {
-            searchTree.insert(course.getTitle(), course);
-        }
     }
 
     public List<CourseDto> getAllCourses() {
@@ -36,7 +27,6 @@ public class CourseService {
 
     public CourseDto saveCourse(CourseDto dto) {
         CourseEntity saved = repository.save(toEntity(dto));
-        searchTree.insert(saved.getTitle(), saved);
         return toDto(saved);
     }
 
@@ -45,17 +35,16 @@ public class CourseService {
         CourseEntity updated = toEntity(dto);
         updated.setId(id);
         CourseEntity saved = repository.save(updated);
-        searchTree.insert(saved.getTitle(), saved);
         return toDto(saved);
     }
 
     public void deleteCourse(Long id) {
         repository.deleteById(id);
-        // Optional: rebuild tree if needed
     }
 
     public List<CourseDto> searchCourses(String query) {
-        return toDtoList(searchTree.search(query));
+        List<CourseEntity> results = repository.findByTitleContainingIgnoreCase(query);
+        return toDtoList(results);
     }
 
     // 🔁 Mapping helpers

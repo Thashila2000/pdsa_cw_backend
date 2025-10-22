@@ -14,8 +14,12 @@ public class CourseEntity {
     private Long id;
 
     private String title;
+
+    @Column(length = 2000)
     private String description;
+
     private String level;
+
     private String imageUrl;
 
     @ElementCollection
@@ -28,11 +32,11 @@ public class CourseEntity {
     @Column(name = "prerequisite")
     private List<String> prerequisites = new ArrayList<>();
 
-    // Constructors
     public CourseEntity() {}
 
-    public CourseEntity(String title, String description, String level, String imageUrl,
-                        List<String> tags, List<String> prerequisites) {
+    public CourseEntity(Long id, String title, String description, String level,
+                        String imageUrl, List<String> tags, List<String> prerequisites) {
+        this.id = id;
         this.title = title;
         this.description = description;
         this.level = level;
@@ -98,7 +102,6 @@ public class CourseEntity {
         this.prerequisites = prerequisites != null ? prerequisites : new ArrayList<>();
     }
 
-    // Optional: equals, hashCode, toString
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

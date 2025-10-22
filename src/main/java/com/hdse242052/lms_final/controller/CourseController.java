@@ -69,7 +69,6 @@ public class CourseController {
     public List<CourseDto> searchCourses(@RequestParam("q") String query) {
         return service.searchCourses(query);
     }
-
     /**
      * Handles image upload and returns a public image URL.
      */
