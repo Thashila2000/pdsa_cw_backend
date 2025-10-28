@@ -1,8 +1,9 @@
 package com.hdse242052.lms_final.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
-
+import java.util.List;
 @Entity
 @Table(name = "subject")
 @Data

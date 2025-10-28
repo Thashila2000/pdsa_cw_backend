@@ -44,4 +44,10 @@ public class DegreeService {
     public List<Degree> getAllDegrees() {
         return degreeRepository.findAll();
     }
+
+    public void deleteDegree(Long id) {
+        Degree degree = degreeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Degree not found"));
+        degreeRepository.delete(degree);
+    }
 }

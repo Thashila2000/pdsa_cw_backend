@@ -21,4 +21,8 @@ public class User {
     private String role;
     private String degreeName;
 
+    @ManyToOne
+    @JoinColumn(name = "degree_id")
+    private Degree degree;
+
 }

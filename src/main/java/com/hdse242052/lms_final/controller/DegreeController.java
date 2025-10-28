@@ -32,4 +32,10 @@ public class DegreeController {
         return ResponseEntity.ok(response);
     }
 
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteDegree(@PathVariable Long id) {
+        degreeService.deleteDegree(id);
+        return ResponseEntity.ok("Degree deleted successfully.");
+    }
+
 }
