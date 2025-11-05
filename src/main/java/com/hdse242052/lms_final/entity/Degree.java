@@ -8,6 +8,7 @@ import java.util.List;
 @Table(name = "degree")
 @Data
 public class Degree {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -20,4 +21,8 @@ public class Degree {
 
     @OneToMany(mappedBy = "degree", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Subject> subjects;
+
+    // Link to tasks assigned to this degree
+    @OneToMany(mappedBy = "degree", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TaskEntity> tasks;
 }

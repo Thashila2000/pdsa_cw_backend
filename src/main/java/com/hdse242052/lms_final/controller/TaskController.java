@@ -21,6 +21,7 @@ public class TaskController {
     @Autowired
     private TaskService scheduler;
 
+    // ✅ Create a task with optional dependency-based start time
     @PostMapping
     public String addTask(@RequestBody TaskEntity task) {
         List<TaskEntity> allTasks = taskRepo.findAll();
@@ -34,27 +35,37 @@ public class TaskController {
         return "Task added";
     }
 
+    // ✅ Get tasks, optionally filtered by degreeId
     @GetMapping
-    public List<TaskEntity> getAllTasks() {
-        return taskRepo.findAll();
+    public List<TaskEntity> getTasks(@RequestParam(required = false) Long degreeId) {
+        return (degreeId != null)
+                ? taskRepo.findByDegreeId(degreeId)
+                : taskRepo.findAll();
     }
 
+
+    // ✅ Get scheduled task DTOs — filtered by degreeId only
     @GetMapping("/schedule")
-    public List<TaskDto> getScheduledTasks() {
-        List<TaskEntity> tasks = taskRepo.findAll();
+    public List<TaskDto> getScheduledTasks(@RequestParam(required = false) Long degreeId) {
+        List<TaskEntity> tasks = (degreeId != null)
+                ? taskRepo.findByDegreeId(degreeId)
+                : taskRepo.findAll();
+
         return scheduler.computeSchedule(tasks);
     }
 
+    // ✅ Delete task by ID
     @DeleteMapping("/{id}")
     public String deleteTask(@PathVariable Long id) {
-        if (taskRepo.existsById(id)) {
-            taskRepo.deleteById(id);
-            return "Task deleted";
-        } else {
+        if (!taskRepo.existsById(id)) {
             return "Task not found";
         }
+
+        taskRepo.deleteById(id);
+        return "Task deleted";
     }
 
+    // ✅ Update task by ID
     @PutMapping("/{id}")
     public String updateTask(@PathVariable Long id, @RequestBody TaskEntity updatedTask) {
         return taskRepo.findById(id).map(existingTask -> {
@@ -64,6 +75,7 @@ public class TaskController {
             existingTask.setDuration(updatedTask.getDuration());
             existingTask.setPriority(updatedTask.getPriority());
             existingTask.setDependencies(updatedTask.getDependencies());
+            existingTask.setDegree(updatedTask.getDegree());
 
             if (updatedTask.getDependencies() != null && !updatedTask.getDependencies().isEmpty()) {
                 LocalDateTime computedStart = scheduler.computeStartTimeFromDependencies(updatedTask, allTasks);

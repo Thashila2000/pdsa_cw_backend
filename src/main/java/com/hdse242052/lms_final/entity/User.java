@@ -9,20 +9,27 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString(exclude = "password")
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String fullName;
+
+    @Column(unique = true, nullable = false)
     private String indexNumber;
+
     private String email;
+
     private String password;
+
     private String role;
+
     private String degreeName;
 
     @ManyToOne
     @JoinColumn(name = "degree_id")
     private Degree degree;
-
 }

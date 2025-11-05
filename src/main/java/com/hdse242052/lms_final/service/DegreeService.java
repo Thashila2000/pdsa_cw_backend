@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +18,7 @@ public class DegreeService {
     private final DegreeRepository degreeRepository;
     private final CategoryRepository categoryRepository;
 
+    // Add a new degree and clone subjects from its category
     public void addDegree(DegreeRequest request) {
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("Category not found"));
@@ -35,19 +35,27 @@ public class DegreeService {
             clone.setCategory(category); // maintain category link
             clone.setDegree(degree);     // link to new degree
             return clone;
-        }).collect(Collectors.toList());
+        }).toList();
 
-        degree.setSubjects(clonedSubjects); // Attach subjects to degree
-        degreeRepository.save(degree);      // Cascade saves subjects with degree_id
+        degree.setSubjects(clonedSubjects);
+        degreeRepository.save(degree); // cascade saves subjects
     }
 
+    // Get all degrees
     public List<Degree> getAllDegrees() {
         return degreeRepository.findAll();
     }
 
+    // Delete a degree by ID
     public void deleteDegree(Long id) {
         Degree degree = degreeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Degree not found"));
         degreeRepository.delete(degree);
+    }
+
+    // Get a degree by name (used for badge routing)
+    public Degree getDegreeByName(String name) {
+        return degreeRepository.findByName(name)
+                .orElseThrow(() -> new RuntimeException("Degree not found"));
     }
 }

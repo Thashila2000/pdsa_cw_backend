@@ -26,4 +26,11 @@ public class TaskEntity {
     )
     @Column(name = "dependency_id")
     private List<Long> dependencies;
+
+    // Link each task to a specific degree
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "degree_id", nullable = false)
+    private Degree degree;
+
+
 }

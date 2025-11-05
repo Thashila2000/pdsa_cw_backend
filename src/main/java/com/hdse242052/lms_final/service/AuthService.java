@@ -46,7 +46,7 @@ public class AuthService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(request.getRole() != null ? request.getRole() : "STUDENT")
-                .degree(degree)                  // ✅ assign actual Degree entity
+                .degree(degree)                  // assign actual Degree entity
                 .degreeName(degree.getName())    // optional convenience field
                 .build();
 

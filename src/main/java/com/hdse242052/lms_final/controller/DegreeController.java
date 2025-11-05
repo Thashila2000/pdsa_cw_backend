@@ -15,6 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class DegreeController {
+
     private final DegreeService degreeService;
 
     @PostMapping("/add")
@@ -38,4 +39,13 @@ public class DegreeController {
         return ResponseEntity.ok("Degree deleted successfully.");
     }
 
+    // Fetch degree by name (used as badge slug)
+    @GetMapping("/byName/{name}")
+    public ResponseEntity<DegreeResponse> getDegreeByName(@PathVariable String name) {
+        Degree degree = degreeService.getDegreeByName(name);
+        if (degree == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(new DegreeResponse(degree));
+    }
 }
