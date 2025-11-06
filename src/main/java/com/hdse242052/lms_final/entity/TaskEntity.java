@@ -15,7 +15,7 @@ public class TaskEntity {
     private Long id;
 
     private String name;
-    private int duration;     // in minutes or hours — clarify in UI
+    private int duration;     // in hours —
     private int priority;     // lower number = higher priority
     private LocalDateTime startTime;
 

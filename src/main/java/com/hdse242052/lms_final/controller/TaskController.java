@@ -21,7 +21,7 @@ public class TaskController {
     @Autowired
     private TaskService scheduler;
 
-    // ✅ Create a task with optional dependency-based start time
+    // Create a task with optional dependency-based start time
     @PostMapping
     public String addTask(@RequestBody TaskEntity task) {
         List<TaskEntity> allTasks = taskRepo.findAll();
@@ -35,7 +35,7 @@ public class TaskController {
         return "Task added";
     }
 
-    // ✅ Get tasks, optionally filtered by degreeId
+    // Get tasks, optionally filtered by degreeId
     @GetMapping
     public List<TaskEntity> getTasks(@RequestParam(required = false) Long degreeId) {
         return (degreeId != null)
@@ -44,7 +44,7 @@ public class TaskController {
     }
 
 
-    // ✅ Get scheduled task DTOs — filtered by degreeId only
+    // Get scheduled task DTOs — filtered by degreeId only
     @GetMapping("/schedule")
     public List<TaskDto> getScheduledTasks(@RequestParam(required = false) Long degreeId) {
         List<TaskEntity> tasks = (degreeId != null)
@@ -54,7 +54,7 @@ public class TaskController {
         return scheduler.computeSchedule(tasks);
     }
 
-    // ✅ Delete task by ID
+    // Delete task by ID
     @DeleteMapping("/{id}")
     public String deleteTask(@PathVariable Long id) {
         if (!taskRepo.existsById(id)) {
@@ -65,7 +65,7 @@ public class TaskController {
         return "Task deleted";
     }
 
-    // ✅ Update task by ID
+    // Update task by ID
     @PutMapping("/{id}")
     public String updateTask(@PathVariable Long id, @RequestBody TaskEntity updatedTask) {
         return taskRepo.findById(id).map(existingTask -> {
