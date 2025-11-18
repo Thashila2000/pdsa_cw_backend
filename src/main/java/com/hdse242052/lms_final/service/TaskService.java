@@ -6,9 +6,12 @@ import com.hdse242052.lms_final.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import jakarta.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+
+
 
 @Service
 @RequiredArgsConstructor
@@ -16,7 +19,11 @@ public class TaskService {
 
     private final TaskRepository taskRepository;
 
-    // Converts TaskEntity to TaskDto with full metadata
+    @PostConstruct
+    public void init() {
+        System.out.println("✅ TaskService initialized");
+    }
+
     private TaskDto toDto(TaskEntity task, LocalDateTime computedStart) {
         TaskDto dto = new TaskDto();
         dto.setId(task.getId());
@@ -35,7 +42,6 @@ public class TaskService {
         return dto;
     }
 
-    // Computes full schedule with dependency-aware start and end times
     public List<TaskDto> computeSchedule(List<TaskEntity> tasks) {
         Map<Long, TaskEntity> taskMap = tasks.stream()
                 .collect(Collectors.toMap(TaskEntity::getId, t -> t));
@@ -47,7 +53,7 @@ public class TaskService {
 
         for (TaskEntity task : tasks) {
             if (task.getDependencies() == null || task.getDependencies().isEmpty()) {
-                startTimes.put(task.getId(), task.getStartTime());
+                startTimes.put(task.getId(), task.getStartTime() != null ? task.getStartTime() : LocalDateTime.now());
             }
         }
 
@@ -62,10 +68,10 @@ public class TaskService {
             result.add(toDto(task, start));
         }
 
+        result.sort(Comparator.comparing(TaskDto::getComputedStart));
         return result;
     }
 
-    // Recursive DFS to compute start time based on dependencies
     private LocalDateTime visit(Long id, Map<Long, TaskEntity> taskMap,
                                 Map<Long, LocalDateTime> startTimes, Set<Long> visited) {
         if (visited.contains(id)) return startTimes.get(id);
@@ -74,13 +80,15 @@ public class TaskService {
         TaskEntity task = taskMap.get(id);
         LocalDateTime maxEnd = task.getStartTime() != null ? task.getStartTime() : LocalDateTime.MIN;
 
-        for (Long depId : task.getDependencies()) {
-            TaskEntity dep = taskMap.get(depId);
-            if (dep != null) {
-                LocalDateTime depEnd = visit(depId, taskMap, startTimes, visited)
-                        .plusHours(dep.getDuration());
-                if (depEnd.isAfter(maxEnd)) {
-                    maxEnd = depEnd;
+        if (task.getDependencies() != null) {
+            for (Long depId : task.getDependencies()) {
+                TaskEntity dep = taskMap.get(depId);
+                if (dep != null) {
+                    LocalDateTime depEnd = visit(depId, taskMap, startTimes, visited)
+                            .plusHours(dep.getDuration());
+                    if (depEnd.isAfter(maxEnd)) {
+                        maxEnd = depEnd;
+                    }
                 }
             }
         }
@@ -89,10 +97,9 @@ public class TaskService {
         return maxEnd;
     }
 
-    // Computes correct start time for a task based on its dependencies
     public LocalDateTime computeStartTimeFromDependencies(TaskEntity task, List<TaskEntity> allTasks) {
         if (task.getDependencies() == null || task.getDependencies().isEmpty()) {
-            return task.getStartTime(); // No dependencies, use provided start time
+            return task.getStartTime() != null ? task.getStartTime() : LocalDateTime.now();
         }
 
         Map<Long, TaskEntity> taskMap = allTasks.stream()
@@ -103,10 +110,9 @@ public class TaskService {
         for (Long depId : task.getDependencies()) {
             TaskEntity dep = taskMap.get(depId);
             if (dep != null && dep.getStartTime() != null) {
-                // Optional: restrict to same degree
                 if (task.getDegree() != null && dep.getDegree() != null &&
                         !task.getDegree().getId().equals(dep.getDegree().getId())) {
-                    continue; // skip cross-degree dependencies
+                    continue;
                 }
 
                 LocalDateTime depEnd = dep.getStartTime().plusHours(dep.getDuration());
@@ -118,7 +124,4 @@ public class TaskService {
 
         return latestEnd;
     }
-
-    // ✅ Removed: getScheduleForStudent(String indexNumber)
-    // Use computeSchedule(tasks) after fetching by degreeId instead
 }

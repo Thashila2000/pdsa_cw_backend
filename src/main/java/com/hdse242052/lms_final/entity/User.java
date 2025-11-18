@@ -32,4 +32,7 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "degree_id")
     private Degree degree;
+
+    @Column(name = "profile_image_url")
+    private String profileImageUrl;
 }

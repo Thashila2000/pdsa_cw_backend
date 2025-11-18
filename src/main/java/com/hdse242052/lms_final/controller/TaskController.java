@@ -1,16 +1,17 @@
 package com.hdse242052.lms_final.controller;
 
-import com.hdse242052.lms_final.entity.TaskEntity;
 import com.hdse242052.lms_final.dto.TaskDto;
+import com.hdse242052.lms_final.entity.TaskEntity;
 import com.hdse242052.lms_final.repository.TaskRepository;
 import com.hdse242052.lms_final.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/tasks")
 public class TaskController {
@@ -21,53 +22,54 @@ public class TaskController {
     @Autowired
     private TaskService scheduler;
 
-    // Create a task with optional dependency-based start time
+    // ✅ Create a task with optional dependency-based start time
     @PostMapping
-    public String addTask(@RequestBody TaskEntity task) {
+    public ResponseEntity<TaskEntity> addTask(@RequestBody TaskEntity task) {
         List<TaskEntity> allTasks = taskRepo.findAll();
 
-        if (task.getDependencies() != null && !task.getDependencies().isEmpty()) {
-            LocalDateTime computedStart = scheduler.computeStartTimeFromDependencies(task, allTasks);
-            task.setStartTime(computedStart);
-        }
+        LocalDateTime computedStart = (task.getDependencies() != null && !task.getDependencies().isEmpty())
+                ? scheduler.computeStartTimeFromDependencies(task, allTasks)
+                : (task.getStartTime() != null ? task.getStartTime() : LocalDateTime.now());
 
-        taskRepo.save(task);
-        return "Task added";
+        task.setStartTime(computedStart);
+        TaskEntity saved = taskRepo.save(task);
+        return ResponseEntity.ok(saved);
     }
 
-    // Get tasks, optionally filtered by degreeId
+    // ✅ Get all tasks or filter by degreeId
     @GetMapping
-    public List<TaskEntity> getTasks(@RequestParam(required = false) Long degreeId) {
-        return (degreeId != null)
+    public ResponseEntity<List<TaskEntity>> getTasks(@RequestParam(required = false) Long degreeId) {
+        List<TaskEntity> tasks = (degreeId != null)
                 ? taskRepo.findByDegreeId(degreeId)
                 : taskRepo.findAll();
+        return ResponseEntity.ok(tasks);
     }
 
-
-    // Get scheduled task DTOs — filtered by degreeId only
+    // ✅ Get scheduled task DTOs (computed timeline)
     @GetMapping("/schedule")
-    public List<TaskDto> getScheduledTasks(@RequestParam(required = false) Long degreeId) {
+    public ResponseEntity<List<TaskDto>> getScheduledTasks(@RequestParam(required = false) Long degreeId) {
         List<TaskEntity> tasks = (degreeId != null)
                 ? taskRepo.findByDegreeId(degreeId)
                 : taskRepo.findAll();
 
-        return scheduler.computeSchedule(tasks);
+        List<TaskDto> scheduled = scheduler.computeSchedule(tasks);
+        return ResponseEntity.ok(scheduled);
     }
 
-    // Delete task by ID
+    // ✅ Delete task by ID
     @DeleteMapping("/{id}")
-    public String deleteTask(@PathVariable Long id) {
+    public ResponseEntity<String> deleteTask(@PathVariable Long id) {
         if (!taskRepo.existsById(id)) {
-            return "Task not found";
+            return ResponseEntity.status(404).body("Task not found");
         }
 
         taskRepo.deleteById(id);
-        return "Task deleted";
+        return ResponseEntity.ok("Task deleted");
     }
 
-    // Update task by ID
+    // ✅ Update task by ID
     @PutMapping("/{id}")
-    public String updateTask(@PathVariable Long id, @RequestBody TaskEntity updatedTask) {
+    public ResponseEntity<String> updateTask(@PathVariable Long id, @RequestBody TaskEntity updatedTask) {
         return taskRepo.findById(id).map(existingTask -> {
             List<TaskEntity> allTasks = taskRepo.findAll();
 
@@ -77,15 +79,13 @@ public class TaskController {
             existingTask.setDependencies(updatedTask.getDependencies());
             existingTask.setDegree(updatedTask.getDegree());
 
-            if (updatedTask.getDependencies() != null && !updatedTask.getDependencies().isEmpty()) {
-                LocalDateTime computedStart = scheduler.computeStartTimeFromDependencies(updatedTask, allTasks);
-                existingTask.setStartTime(computedStart);
-            } else {
-                existingTask.setStartTime(updatedTask.getStartTime());
-            }
+            LocalDateTime computedStart = (updatedTask.getDependencies() != null && !updatedTask.getDependencies().isEmpty())
+                    ? scheduler.computeStartTimeFromDependencies(updatedTask, allTasks)
+                    : (updatedTask.getStartTime() != null ? updatedTask.getStartTime() : LocalDateTime.now());
 
+            existingTask.setStartTime(computedStart);
             taskRepo.save(existingTask);
-            return "Task updated";
-        }).orElse("Task not found");
+            return ResponseEntity.ok("Task updated");
+        }).orElse(ResponseEntity.status(404).body("Task not found"));
     }
 }

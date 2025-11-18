@@ -8,7 +8,9 @@ import com.hdse242052.lms_final.repository.CategoryRepository;
 import com.hdse242052.lms_final.repository.DegreeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -18,42 +20,55 @@ public class DegreeService {
     private final DegreeRepository degreeRepository;
     private final CategoryRepository categoryRepository;
 
-    // Add a new degree and clone subjects from its category
+    /**
+     * Adds a new degree and clones subjects from the selected category.
+     */
+    @Transactional
     public void addDegree(DegreeRequest request) {
+        // 1. Fetch the selected category
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("Category not found"));
 
+        // 2. Create the new degree
         Degree degree = new Degree();
         degree.setName(request.getName());
         degree.setCategory(category);
 
-        // Clone subjects from category and link to degree
-        List<Subject> clonedSubjects = category.getSubjects().stream().map(original -> {
+        // 3. Clone subjects from the category
+        List<Subject> clonedSubjects = new ArrayList<>();
+        for (Subject original : category.getSubjects()) {
             Subject clone = new Subject();
             clone.setName(original.getName());
             clone.setCode(original.getCode());
-            clone.setCategory(category); // maintain category link
-            clone.setDegree(degree);     // link to new degree
-            return clone;
-        }).toList();
+            clone.setCategory(category);
+            clone.setDegree(degree); // Link to new degree
+            clonedSubjects.add(clone);
+        }
 
+        // 4. Attach subjects to degree and save
         degree.setSubjects(clonedSubjects);
-        degreeRepository.save(degree); // cascade saves subjects
+        degreeRepository.save(degree); // Cascade saves subjects
     }
 
-    // Get all degrees
+    /**
+     * Returns all degrees.
+     */
     public List<Degree> getAllDegrees() {
         return degreeRepository.findAll();
     }
 
-    // Delete a degree by ID
+    /**
+     * Deletes a degree by ID.
+     */
     public void deleteDegree(Long id) {
         Degree degree = degreeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Degree not found"));
         degreeRepository.delete(degree);
     }
 
-    // Get a degree by name (used for badge routing)
+    /**
+     * Finds a degree by name.
+     */
     public Degree getDegreeByName(String name) {
         return degreeRepository.findByName(name)
                 .orElseThrow(() -> new RuntimeException("Degree not found"));

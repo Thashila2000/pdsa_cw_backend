@@ -24,9 +24,9 @@ public class AuthService {
     private final DegreeRepository degreeRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
-    /**
-     * Register a new student user and assign the Degree entity based on degreeName.
-     */
+
+      //Register a new student user and assign the Degree entity based on degreeName.
+
     public String register(RegisterRequest request) {
         // Check if index number already exists
         if (userRepository.existsByIndexNumber(request.getIndexNumber())) {
@@ -54,9 +54,9 @@ public class AuthService {
         return "Student registered successfully.";
     }
 
-    /**
-     * Login a student user by index number and password.
-     */
+
+     //Login a student user by index number and password.
+
     public ResponseEntity<?> login(LoginRequest request) {
         return userRepository.findByIndexNumber(request.getIndexNumber())
                 .filter(user -> passwordEncoder.matches(request.getPassword(), user.getPassword()))
